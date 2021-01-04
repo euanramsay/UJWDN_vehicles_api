@@ -3,8 +3,8 @@ package com.udacity.vehicles.api;
 
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.service.CarService;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +15,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Implements a REST-based controller for the Vehicles API.
@@ -39,10 +39,11 @@ class CarController {
      * Creates a list to store any vehicles.
      * @return list of vehicles
      */
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) Resources<Resource<Car>> list() {
-        List<Resource<Car>> resources = carService.list().stream().map(assembler::toResource)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    CollectionModel<EntityModel<Car>> list() {
+        List<EntityModel<Car>> resources = carService.list().stream().map(assembler::toModel)
                 .collect(Collectors.toList());
-        return new Resources<>(resources,
+        return new CollectionModel<>(resources,
                 linkTo(methodOn(CarController.class).list()).withSelfRel());
     }
 
@@ -52,9 +53,9 @@ class CarController {
      * @return all information for the requested vehicle
      */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    Resource<Car> get(@PathVariable Long id) {
+    EntityModel<Car> get(@PathVariable Long id) {
         Car car = carService.findById(id);
-        return assembler.toResource(car);
+        return assembler.toModel(car);
     }
 
     /**
@@ -66,8 +67,8 @@ class CarController {
     @PostMapping
     ResponseEntity<?> post(@Valid @RequestBody Car car) throws URISyntaxException {
         Car savedCar = carService.save(car);
-        Resource<Car> resource = assembler.toResource(savedCar);
-        return ResponseEntity.created(new URI(resource.getId().expand().getHref())).body(resource);
+        EntityModel<Car> resource = assembler.toModel(savedCar);
+        return ResponseEntity.created(new URI(resource.getLink("price").toString())).body(resource);
     }
 
     /**
@@ -80,7 +81,7 @@ class CarController {
     ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody Car car) {
         car.setId(id);
         Car savedCar = carService.save(car);
-        Resource<Car> resource = assembler.toResource(savedCar);
+        EntityModel<Car> resource = assembler.toModel(savedCar);
         return ResponseEntity.ok(resource);
     }
 

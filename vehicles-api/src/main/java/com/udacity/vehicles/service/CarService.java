@@ -4,7 +4,10 @@ import com.udacity.vehicles.client.maps.MapsClient;
 import com.udacity.vehicles.client.prices.PriceClient;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.CarRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -19,6 +22,10 @@ public class CarService {
     private final CarRepository repository;
     private final MapsClient mapsClient;
     private final PriceClient priceClient;
+
+    @Autowired
+    @Qualifier("pricing")
+    WebClient.Builder pricingWebClient;
 
     public CarService(CarRepository repository, MapsClient mapsClient, PriceClient priceClient) {
         /**
@@ -58,6 +65,8 @@ public class CarService {
          * Note: The car class file uses @transient, meaning you will need to call
          *   the pricing service each time to get the price.
          */
+
+        PriceClient priceClient = new PriceClient(pricingWebClient.baseUrl("http://price-service").build());
         car.setPrice(priceClient.getPrice(id));
 
         /**
