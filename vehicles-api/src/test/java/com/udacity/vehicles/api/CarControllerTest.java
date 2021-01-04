@@ -97,9 +97,9 @@ public class CarControllerTest {
     public void listCars() throws Exception {
         mvc.perform(get("/cars")
                 .accept(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("_embedded.carList", hasSize(1)))
-                .andExpect(jsonPath("_embedded.carList[0].id").value(1))
-                .andExpect(jsonPath("_embedded.carList[0].details.model").value("Impala"))
+                .andExpect(jsonPath("content", hasSize(1)))
+                .andExpect(jsonPath("content[0].id").value(1))
+                .andExpect(jsonPath("content[0].details.model").value("Impala"))
                 .andExpect(status().isOk());
     }
 
