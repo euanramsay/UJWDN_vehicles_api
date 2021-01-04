@@ -5,6 +5,7 @@ import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.service.CarService;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  */
 @RestController
 @RequestMapping("/cars")
+
+
 class CarController {
 
     private final CarService carService;
@@ -36,8 +39,7 @@ class CarController {
      * Creates a list to store any vehicles.
      * @return list of vehicles
      */
-    @GetMapping
-    Resources<Resource<Car>> list() {
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) Resources<Resource<Car>> list() {
         List<Resource<Car>> resources = carService.list().stream().map(assembler::toResource)
                 .collect(Collectors.toList());
         return new Resources<>(resources,
@@ -49,7 +51,7 @@ class CarController {
      * @param id the id number of the given vehicle
      * @return all information for the requested vehicle
      */
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     Resource<Car> get(@PathVariable Long id) {
         Car car = carService.findById(id);
         return assembler.toResource(car);
