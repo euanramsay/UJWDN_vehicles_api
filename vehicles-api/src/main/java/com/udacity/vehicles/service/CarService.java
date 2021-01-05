@@ -48,7 +48,7 @@ public class CarService {
      */
     public Car findById(Long id) {
         Car car = repository.findById(id).orElseThrow(CarNotFoundException::new);
-        PriceClient priceClient = new PriceClient(pricingWebClient.baseUrl("http://price-service").build());
+        PriceClient priceClient = new PriceClient(pricingWebClient.baseUrl("http://pricing-service").build());
         car.setPrice(priceClient.getPrice(id));
         car.setLocation(mapsClient.getAddress(car.getLocation()));
         return car;
@@ -65,6 +65,7 @@ public class CarService {
                     .map(carToBeUpdated -> {
                         carToBeUpdated.setDetails(car.getDetails());
                         carToBeUpdated.setLocation(car.getLocation());
+                        carToBeUpdated.setCondition(car.getCondition());
                         return repository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
         }

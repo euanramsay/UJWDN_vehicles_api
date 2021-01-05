@@ -1,17 +1,5 @@
 package com.udacity.vehicles.api;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.udacity.vehicles.client.maps.MapsClient;
 import com.udacity.vehicles.client.prices.PriceClient;
 import com.udacity.vehicles.domain.Condition;
@@ -20,11 +8,6 @@ import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.Details;
 import com.udacity.vehicles.domain.manufacturer.Manufacturer;
 import com.udacity.vehicles.service.CarService;
-import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +20,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.net.URI;
+import java.util.Collections;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Implements testing of the CarController class.
@@ -84,8 +80,8 @@ public class CarControllerTest {
         mvc.perform(
                 post(new URI("/cars"))
                         .content(json.write(car).getJson())
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
     }
 
@@ -96,7 +92,7 @@ public class CarControllerTest {
     @Test
     public void listCars() throws Exception {
         mvc.perform(get("/cars")
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("content", hasSize(1)))
                 .andExpect(jsonPath("content[0].id").value(1))
                 .andExpect(jsonPath("content[0].details.model").value("Impala"))
@@ -110,9 +106,25 @@ public class CarControllerTest {
     @Test
     public void findCar() throws Exception {
         mvc.perform(get("/cars/{id}", 1)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("id").value(1))
                 .andExpect(jsonPath("details.model").value("Impala"))
+                .andExpect(status().isOk());
+    }
+
+    /**
+     * Tests the update of a single car by ID.
+     * @throws Exception if the update operation of a vehicle fails
+     */
+    @Test
+    public void updateCar() throws Exception {
+        Car car = getCar();
+        car.setCondition(Condition.NEW);
+        car.getDetails().setModelYear(2020);
+        mvc.perform(put("/cars/{id}", 1)
+                        .content(json.write(car).getJson())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
@@ -123,7 +135,7 @@ public class CarControllerTest {
     @Test
     public void deleteCar() throws Exception {
         mvc.perform(delete("/cars/{id}", 1)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
 
